@@ -3,12 +3,12 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>org.nationaldataservice.elasticsearch</groupId>
-	<artifactId>queryexpansion</artifactId>
-	<version>5.3.2-SNAPSHOT</version>
+	<artifactId>querydocprior</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<name>queryexpansion</name>
-	<description>A custom plugin for ElasticSearch to enable Query Expansion</description>
+	<description>A custom plugin for ElasticSearch to enable query-dependent repository priors</description>
 	<url>http://maven.apache.org</url>
 
 	<parent>

@@ -1,4 +1,4 @@
-package org.nationaldataservice.elasticsearch.rocchio;
+package org.nationaldataservice.elasticsearch.priors;
 
 import java.util.Arrays;
 
@@ -16,14 +16,13 @@ import org.elasticsearch.plugins.Plugin;
 import org.elasticsearch.rest.RestController;
 import org.elasticsearch.rest.RestHandler;
 
-public class QueryExpansionPlugin extends Plugin implements ActionPlugin {
+public class QueryDocPriorPlugin extends Plugin implements ActionPlugin {
 	@Override
 	public List<RestHandler> getRestHandlers(Settings settings, RestController restController,
 			ClusterSettings clusterSettings, IndexScopedSettings indexScopedSettings, SettingsFilter settingsFilter,
 			IndexNameExpressionResolver indexNameExpressionResolver, Supplier<DiscoveryNodes> nodesInCluster) {
 		return Arrays.asList(
-				new RocchioExpandRestAction(settings, restController),   // Roccio query expansion
-				new RocchioSearchRestAction(settings, restController)    // Query expansion + search
+				new QueryDocPriorSearchRestAction(settings, restController)    // Compute prior + search
 			);
 	}
 }
