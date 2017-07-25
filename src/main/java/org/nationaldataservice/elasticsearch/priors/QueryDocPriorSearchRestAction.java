@@ -29,6 +29,8 @@ import joptsimple.internal.Strings;
 
 public class QueryDocPriorSearchRestAction extends BaseRestHandler {
 	
+	public static final String DEFAULT_PRIOR_KEY = "__DEFAULT_PRIOR__";
+	
 	@Inject
 	public QueryDocPriorSearchRestAction(Settings settings, RestController controller) {
 		super(settings);
@@ -81,6 +83,7 @@ public class QueryDocPriorSearchRestAction extends BaseRestHandler {
 		String field = request.param("field", "_all");
 		int fbDocs = Integer.parseInt(request.param("fbDocs", "10"));
 		double epsilon = Double.parseDouble(request.param("epsilon", "1.0"));
+		int numRepositories = Integer.parseInt(request.param("repositories", "23")); // from BioCADDIE challenge dataset, update if inaccurate
 		
 		// Optional stoplist (defaults to null)
 		String stoplist = request.param("stoplist", null);
@@ -95,19 +98,24 @@ public class QueryDocPriorSearchRestAction extends BaseRestHandler {
 			SearchHits fbHits = runQuery(client, index, query, fbDocs);
 			
 			// Compute priors from feedback docs
-			Map<String, Double> priors = new HashMap<String, Double>();
+			Map<String, Object> priors = new HashMap<String, Object>();
 			for (SearchHit fbHit : fbHits) {
 				Map<String, Object> source = fbHit.getSource();
 				String repository = (String) source.get("REPOSITORY");
-				priors.put(repository, (priors.getOrDefault(repository, epsilon) + 1.0));
+				priors.put(repository, ((double) priors.getOrDefault(repository, epsilon) + 1.0));
 			}
+			priors.put(DEFAULT_PRIOR_KEY, (double) epsilon); // we need a default based on the epsilon
 			for (String repository : priors.keySet()) {
-				priors.put(repository, priors.get(repository) / (fbDocs + epsilon * priors.keySet().size()));
+				// Turn the counts into probabilities
+				// Subtract one from priors.size() because the default value does not count as a repository
+				priors.put(repository, (double) priors.get(repository) / (fbDocs + epsilon * numRepositories));
 			}
 			
-			// Script parameters maybe?
-			Map<String, Object> params = new HashMap<String, Object>();
-			params.put("priors", priors);
+			// Log info about the priors that have been computed
+			this.logger.info("Parameters: ");
+			for (String param : priors.keySet()) {
+				this.logger.info(param + ": " + (double) priors.get(param));
+			}
 			
 			// Now, perform the actual search with the query document prior
 			this.logger.info("Running query with prior against: " + index);
@@ -115,8 +123,8 @@ public class QueryDocPriorSearchRestAction extends BaseRestHandler {
 					new Script(
 							ScriptType.INLINE,
 							"painless",
-							"_score * priors.getOrDefault(_source.REPOSITORY, 1.0)",
-							params));
+							"_score * params.getOrDefault(params._source['REPOSITORY'], 1.0)",
+							priors));
 			QueryStringQueryBuilder queryStringQueryBuilder = new QueryStringQueryBuilder(query);
 			FunctionScoreQueryBuilder queryFunction = new FunctionScoreQueryBuilder(queryStringQueryBuilder, scoreFunction);
 
@@ -124,7 +132,7 @@ public class QueryDocPriorSearchRestAction extends BaseRestHandler {
 			searchRequestBuilder.setQuery(queryFunction);
 			SearchResponse response = searchRequestBuilder.execute().actionGet();
 			SearchHits hits = response.getHits();
-
+			
 			// Build of a response of our search hits
 			this.logger.debug("Responding: " + query.toString());
 			return channel -> {
