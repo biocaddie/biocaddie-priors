@@ -81,7 +81,6 @@ public class QueryDocPriorSearchRestAction extends BaseRestHandler {
 		// Optional parameters, with sensible defaults
 		String type = request.param("type", "dataset");
 		String field = request.param("field", "_all");
-		int numDocs = Integer.parseInt(request.param("numDocs", "10"));
 		int fbDocs = Integer.parseInt(request.param("fbDocs", "10"));
 		double epsilon = Double.parseDouble(request.param("epsilon", "1.0"));
 		int numRepositories = Integer.parseInt(request.param("repositories", "23")); // from BioCADDIE challenge dataset, update if inaccurate
@@ -130,7 +129,7 @@ public class QueryDocPriorSearchRestAction extends BaseRestHandler {
 			FunctionScoreQueryBuilder queryFunction = new FunctionScoreQueryBuilder(queryStringQueryBuilder, scoreFunction);
 
 			SearchRequestBuilder searchRequestBuilder = client.prepareSearch(index);
-			searchRequestBuilder.setQuery(queryFunction).setSize(numDocs);
+			searchRequestBuilder.setQuery(queryFunction);
 			SearchResponse response = searchRequestBuilder.execute().actionGet();
 			SearchHits hits = response.getHits();
 			
