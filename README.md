@@ -1,15 +1,49 @@
-# elasticsearch-querydocprior-plugin
-A simple ElasticSearch plugin wrapping around the search endpoint to provide query-dependent document prior search
+# Query-Independent Priors
+The script `query-independent-priors.py` can be used to calculate query-independent priors on the basis of training data. To simply print the repository priors, use the `--no-update` option. Otherwise, this script will attempt to update an existing ElasticSearch index to add the priors it has computed.
 
-# Prerequisites
+## Usage
+In general, query independent priors can be computed and updated with the following command:
+```
+python3 query-independent-priors.py -q <qrels> -d <update_json_folder>
+```
+There are several options. The defaults for ElasticSearch updating are based on a basic ElasticSearch installation with an index called "biocaddie." These parameters may be overridden with the `-u`, `-p`, and `-i` options. See all options with `-h`.
+
+## Scoring with Pre-computed Priors
+Once your ElasticSearch index is updated to include priors, they may be incorporated into document scoring using the following query format (with an example curl command):
+```
+curl -XGET '<host>:<port>/<index>/_search?pretty' -H 'Content-Type: application/json' -d'
+{
+  "query": {
+    "function_score": {
+      "query": {
+        "query_string": {
+          "query": "<query string>"
+        }
+      },
+      "script_score": {
+        "script": {
+          "lang": "painless",
+          "inline": "_score * params._source.prior"
+        }
+      }
+    }
+  }
+}'
+```
+Be sure to replace bracketed sections with your required values. This will adjust the raw document score by multiplying it against the stored prior value previously computed.
+
+# Query-Dependent Priors
+For query-dependent priors, we provide a simple ElasticSearch plugin wrapping around the search endpoint. Once installed, query-dependent priors may be computed and incorporated into scoring on-the-fly by directing searches to the `/<index>/_priorsearch` REST endpoint.
+
+## Prerequisites
 * Docker
    
 **OR**
 
 * Git + Maven
 
-# Usage
-For now, cloning the source is required to run the plugin (see TODOs):
+## Usage
+For now, cloning the source is required to run the plugin:
 ```bash
 git clone gtsherman/biocaddie-priors && cd biocaddie-priors 
 ```
@@ -20,7 +54,7 @@ To use:
 2. [Load](README.md#load)
 3. [Test](README.md#test)
 
-## Setup
+### Setup
 Make sure that the biocaddie benchmark test dataset exists somewhere on disk:
 ```bash
 cd $HOME
@@ -46,7 +80,7 @@ Finally, use the helper script to add the documents to the index:
 
 NOTE: Indexing the full benchmark set can take a long time. If you only need a small subset of the documents, you can always `Ctrl+C` once you get the desired number of records indexed.
 
-## Build
+### Build
 A helper script has been included to ease building:
 ```bash
 ./scripts/build.sh
@@ -58,14 +92,14 @@ Either way, the build should produce a `target/releases/` directory with the nec
 
 The `.zip` that ElasticSearch needs should be found at `./target/releases/queryexpansion-5.3.2-SNAPSHOT.zip`.
 
-## Load
+### Load
 Once the artifacts are built, we just need to install them and restart ElasticSearch:
 ```bash
 ./scripts/install.sh
 ./scripts/restart.sh
 ```
 
-## Test
+### Test
 You should now be able to test the new endpoint using the helper script or via raw `curl`:
 ```bash
 $ ./test.sh
@@ -85,7 +119,7 @@ $ ./logs.sh
 ```
 
 ## Helper Scripts
-A few other helper scripts are included to ease testing:
+A few other helper scripts are included to ease testing of the plugin:
 ```bash
 ./scripts/start.sh          # Runs or starts your elasticsearch container
 ./scripts/stop.sh           # Stops your elasticsearch container
@@ -102,4 +136,4 @@ A few other helper scripts are included to ease testing:
 ```
 
 # Credit
-This code is pseudo-forked from https://github.com/bodom0015/elasticsearch-queryexpansion-plugin. Much of it remains unchanged, and strangeness may occur.
+The plugin code is pseudo-forked from https://github.com/bodom0015/elasticsearch-queryexpansion-plugin. Much of it remains unchanged, and strangeness may occur.
