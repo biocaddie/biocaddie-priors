@@ -29,12 +29,9 @@ import static org.junit.Assume.*;
 
 /**
  * This is a simple base integration test suite class for the 
- * ElasticSearch Rocchio Plugin. Use these test cases to verify correctness of the API endpoint, 
+ * ElasticSearch Priors Plugin. Use these test cases to verify correctness of the API endpoint, 
  * input validation, compare performance, scale testing, etc
  * 
- * @see <a href='https://www.elastic.co/guide/en/elasticsearch/reference/5.3/integration-tests.html'>
- * 			ElasticSearch Integration Tests
- * 		</a>
  * 
  * @author lambert8
  *
