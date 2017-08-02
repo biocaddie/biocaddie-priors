@@ -163,6 +163,10 @@ public class QueryDocPriorSearchRestAction extends BaseRestHandler {
 	 * Run the query using the client (this assumes that the client has already
 	 * been initialized and is ready to execute)
 	 * 
+	 * @param client
+	 * 			  The client to use for the connection 
+	 * @param index
+	 * 			  The string index to search
 	 * @param query
 	 *            Query string
 	 * @param numDocs

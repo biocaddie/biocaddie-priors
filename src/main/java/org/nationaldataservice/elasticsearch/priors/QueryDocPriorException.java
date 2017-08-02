@@ -8,14 +8,14 @@ public class QueryDocPriorException extends Exception {
 	private static final long serialVersionUID = 5961496592606387768L;
 
 	/**
-	 * An {@link Exception} encountered during {@link QueryDocPriorSearch} operations
+	 * An {@link Exception} encountered during {@link QueryDocPriorSearchRestAction} operations
 	 */
 	public QueryDocPriorException() {
 		
 	}
 
 	/**
-	 * An {@link Exception} encountered during {@link QueryDocPriorSearch} operations
+	 * An {@link Exception} encountered during {@link QueryDocPriorSearchRestAction} operations
 	 * 
 	 * @param message {@link String} the error message
 	 */
@@ -24,7 +24,7 @@ public class QueryDocPriorException extends Exception {
 	}
 
 	/**
-	 * An exception encountered during {@link QueryDocPriorSearch} operations
+	 * An exception encountered during {@link QueryDocPriorSearchRestAction} operations
 	 * 
 	 * @param cause the {@link Throwable} cause
 	 */
@@ -33,7 +33,7 @@ public class QueryDocPriorException extends Exception {
 	}
 
 	/**
-	 * An exception encountered during {@link QueryDocPriorSearch} operations
+	 * An exception encountered during {@link QueryDocPriorSearchRestAction} operations
 	 * 
 	 * @param message {@link String} the error message
 	 * @param cause the {@link Throwable} underlying cause
@@ -43,7 +43,7 @@ public class QueryDocPriorException extends Exception {
 	}
 
 	/**
-	 * An exception encountered during {@link QueryDocPriorSearch} operations
+	 * An exception encountered during {@link QueryDocPriorSearchRestAction} operations
 	 *
 	 * @param message {@link String} the error message
 	 * @param cause the {@link Throwable} underlying cause
